@@ -1,7 +1,7 @@
 body, html {
   padding: 0;
   margin: 0;
-  background: #eef2ff;
+  background: #EEF2FF;
   font-family: arial, helvetica, sans-serif;
   font-size: 14px;
 }
@@ -34,9 +34,9 @@ ul {
   top: 27px;
   right: 0px;
   padding: 10px;
-  background: #eef2ff;
-  border-bottom: 1px solid #d6daf0;
-  border-left: 1px solid #d6daf0;
+  background: #EEF2FF;
+  border-bottom: 1px solid #D6DAF0;
+  border-left: 1px solid #D6DAF0;
 }
 
 .sidebar_shower {
@@ -58,7 +58,7 @@ ul {
 }
 
 .sidebar_banner {
-  background: #aaaaaa;
+  background: #AAAAAA;
   margin: 0;
   position: absolute;
   right: 0px;
@@ -69,15 +69,15 @@ ul {
 }
 
 .sidebar_convo_dim {
-	background: none !important;
+  background: none !important;
 }
 
 .sidebar_convo {
-        display: inherit;
-        padding: 3px;
-        padding-left: 8px;
-        background: #d6daf0;
-        margin-bottom: 3px;
+  display: inherit;
+  padding: 3px;
+  padding-left: 8px;
+  background: #D6DAF0;
+  margin-bottom: 3px;
 }
 
 .sidebar_convo:hover {
@@ -97,11 +97,11 @@ ul {
 }
 
 .homescreen {
-  color: white !important;
+  color: #FFFFFF !important;
 }
 
 .homescreen:hover {
-  color: #016c71 !important;
+  color: #016C71 !important;
 }
 
 @media (max-width: 900px) {
@@ -170,7 +170,7 @@ ul {
   width: auto;
   left: 0px;
   right: 255px;
-  background: #9988ee;
+  background: #9988EE;
   font-size: 16px;
   min-width: 300px;
   height: 155px;
@@ -215,7 +215,7 @@ ul {
 }
 
 .redtext {
-  color: #dd0000;
+  color: #DD0000;
 }
 
 .home_screen {
@@ -274,7 +274,7 @@ ul {
 }
 
 .chat:after {
-  color: #ff0000;
+  color: #FF0000;
 }
 
 .chat_full, .chat_embed {
@@ -323,7 +323,7 @@ ul {
 }
 
 .chat_img:hover {
-  cursor:pointer;
+  cursor: pointer;
 }
 
 .chat_name {
@@ -396,7 +396,7 @@ ul {
   text-decoration: underline;
 }
 
-.delete_part:hover, .wipe_part:hover, .warn_part:hover, .move_part:hover, .ban_part:hover, .country_part:hover, .mute_part:hover {
+.delete_part:hover, .wipe_part:hover, .warn_part:hover, .move_part:hover, .ban_part:hover, .country_part:hover, .mute_part:hover, .link:hover {
   color: #DD0000;
   cursor: pointer;
 }
@@ -423,11 +423,6 @@ a:hover {
   padding: 5px;
   display: inline-block;
   text-decoration: none;
-}
-
-.link:hover {
-  color: #DD0000;
-  cursor: pointer;
 }
 
 textarea {
@@ -491,20 +486,20 @@ pre {
 }
 
 .admin {
-  color: #b500b5;
+  color: #B500B5;
 }
 
 .dev {
-  color: #dd0000;
+  color: #DD0000;
 }
 
 .contrib {
-  color: #0028dd;
+  color: #0028DD;
 }
 
 .alert_div {
-  background: white;
-  color: black;
+  background: #FFFFFF;
+  color: #000000;
   border: none;
   text-align: center;
   padding: 5px;
@@ -513,13 +508,13 @@ pre {
 }
 
 #alert_div_captcha {
-  background-color: #eef2ff;
-  border:1px #d6daf0 solid;
+  background-color: #EEF2FF;
+  border:1px #D6DAF0 solid;
 }
 
 .alert_message {
   display: block;
-  color: black;
+  color: #000000;
 }
 
 .alert_button {
@@ -528,15 +523,11 @@ pre {
 }
 
 .spoiler {
-  background: black;
-  color: black;
+  background: #000000;
+  color: #000000;
 }
 
-.spoiled { 
-  background: none;
-}
-
-.spoiler:hover {
+.spoiled, .spoiler:hover { 
   background: none;
 }
 
@@ -554,10 +545,10 @@ pre {
 }
 
 .tooltip:hover:after {
-  background: #fffff;
-  background: rgba(255,255,255,.8);
+  background: #FFFFFF;
+  background: rgba(255,255,255,0.8);
   bottom: 10px;
-  color: black;
+  color: #000000;
   content: attr(data-country);
   left: 0;
   font-size: 12px;
@@ -579,6 +570,6 @@ pre {
 
 
 .chat_highlight {
-  border-left: 4px solid #dd0000;
-  background-color: #B3b9da;
+  border-left: 4px solid #DD0000;
+  background-color: #B3B9DA;
 }
