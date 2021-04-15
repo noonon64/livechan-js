@@ -1,24 +1,26 @@
-body,html {
+body, html {
   background: none repeat scroll 0% 0% #FFFFFF;
-  color: #222;
+  color: #222222;
 }
 
-.settings_nav{
-  color: grey;
+.settings_nav {
+  color: #808080;
   background: none repeat scroll 0% 0% #FFFFFF;
 }
 
-#comment-form{
+#comment-form {
 	
 }
 
-.chats_container{
-	top:0;
+.chats_container {
+  top:0;
 }
-.chats{
-	padding-top:20px;
+
+.chats {
+  padding-top:20px;
 }
-.create.shown{
+
+.create.shown {
   background: none repeat scroll 0% 0% #FFFFFF;
   border: none;
   margin-left: auto;
@@ -27,13 +29,13 @@ body,html {
 
 textarea{
   background: #FAFAFA;
-  color: grey;
+  color: #808080;
   border: none;
 }
 
 input{
   background: #FFFFFF;
-  color: grey;
+  color: #808080;
   border: none;
 }
 
@@ -58,40 +60,40 @@ input{
 }
 
 .chat a, span.link, .chat .chat_header .chat_number {
-  color: grey
+  color: #808080;
 }
 
 .chat a:hover, span.link:hover, .chat .chat_header .chat_number:hover {
-  color: grey;
+  color: #808080;
 }
 
 .chat_name {
-  color: grey;
+  color: #808080;
 }
 
 .chat_name .trip_code {
-  color: grey;         
+  color: #808080;         
 }
 
 .chat_name.contrib {
-  color: grey;
+  color: #808080;
 }
 
 .chat_name.admin .trip_code {
-  color: grey;
+  color: #808080;
 }
 
 .chat_name.admin {
-  color: grey;
+  color: #808080;
 }
 
 .chat_name.contrib .trip_code {
-  color: grey;
+  color: #808080;
 }
 
 .chat_header {
   background-color: #FFFFFF;
-  width:100%;
+  width: 100%;
 }
 
 .greentext {
@@ -107,7 +109,6 @@ input{
   clear: left;
   padding: 4px 8px 8px 0px;
 }
-
 
 .create .name {
 
@@ -137,17 +138,17 @@ input{
   background-color: #282A2E !important;
 }
 
-#settings_button{
- background-color: #FFFFFF;
- color: #000000;
- border: none;
- width: 100px;
- height: 50px;
- border-radius: 5px;
- font-size: 14px;
+#settings_button {
+  background-color: #FFFFFF;
+  color: #000000;
+  border: none;
+  width: 100px;
+  height: 50px;
+  border-radius: 5px;
+  font-size: 14px;
 }
 
-#board_select{
+#board_select {
  background-color: #FFFFFF;
  color: #000000;
  border: none;
@@ -158,70 +159,68 @@ input{
  text-decoration: none;
 }
 
-#user_count{
- text-align: center;
+#user_count {
+  text-align: center;
   vertical-align: middle;
   line-height: 25px; 
 }
 
-#header{
+#header {
   height: 25px;
 }
 
-.chat_body{
+.chat_body {
   padding-top: 15px;
-
 }
 
-#thumbnail_mode{
-	background-color: #FFFFFF;
- color: #000000;
- border: none;
- width: 150px;
- height: 50px;
- border-radius: 5px;
- font-size: 14px;
- text-decoration: none;	
+#thumbnail_mode {
+  background-color: #FFFFFF;
+  color: #000000;
+  border: none;
+  width: 150px;
+  height: 50px;
+  border-radius: 5px;
+  font-size: 14px;
+  text-decoration: none;	
 }
 
-#convo_filter{
-	background-color: #FFFFFF;
- color: #000000;
- border: none;
- width: 150px;
- height: 50px;
- border-radius: 5px;
- font-size: 14px;
- text-decoration: none;	
+#convo_filter {
+  background-color: #FFFFFF;
+  color: #000000;
+  border: none;
+  width: 150px;
+  height: 50px;
+  border-radius: 5px;
+  font-size: 14px;
+  text-decoration: none;	
 }
 
-#theme_select{
-	background-color: #FFFFFF;
- color: #000000;
- border: none;
- width: 150px;
- height: 50px;
- border-radius: 5px;
- font-size: 14px;
- text-decoration: none;	
+#theme_select {
+  background-color: #FFFFFF;
+  color: #000000;
+  border: none;
+  width: 150px;
+  height: 50px;
+  border-radius: 5px;
+  font-size: 14px;
+  text-decoration: none;	
 }
 
-#sidebar_hider{
-	background-color: #FFFFFF;
- color: #000000;
- border: none;
- width: 150px;
- height: 50px;
- border-radius: 5px;
- font-size: 14px;
- text-decoration: none;	
+#sidebar_hider {
+  background-color: #FFFFFF;
+  color: #000000;
+  border: none;
+  width: 150px;
+  height: 50px;
+  border-radius: 5px;
+  font-size: 14px;
+  text-decoration: none;	
 }
 
-#name{
+#name {
   background-color: #FAFAFA;
 }
 
-#convo{
+#convo {
   background-color: #FAFAFA;	
 }
-
