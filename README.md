@@ -12,8 +12,8 @@ But keep in mind it still won't fully work, and you can help by diagnosing the p
 After getting it work with the old code, the goal is to update and fix the code until it works under node 6.0.0
 
 Development Milestones:
-Getting it to work with node 0.12.0
-Getting it to work with node 4.0.0
+Getting it to work with node 0.12.0  
+Getting it to work with node 4.0.0  
 Getting it to work with node 6.0.0
 
 Requirements:
