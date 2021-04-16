@@ -6,7 +6,7 @@ livechan is a live IRC like image board written in node.js.
 Installation
 ====
 
-The following notes will NOT work, You can use the following guide to get livechan in an almost-working state: https://ghostbin.co/paste/tywqg
+The following notes will NOT work, You can use the following guide to get livechan in an almost-working state on Ubuntu 20.04: https://ghostbin.co/paste/tywqg
 But keep in mind it still won't fully work, and you can help by diagnosing the problem.
 
 Requirements:
