@@ -9,13 +9,6 @@ Installation
 The following notes will NOT work, You can use the following guide to get livechan in an almost-working state on Ubuntu 20.04: https://ghostbin.co/paste/tywqg
 But keep in mind it still won't fully work, and you can help by diagnosing the problem.
 
-After getting it work with the old code, the goal is to update and fix the code until it works under node 6.0.0
-
-Development Milestones:  
-Getting it to work with node 0.12.0  
-Getting it to work with node 4.0.0  
-Getting it to work with node 6.0.0
-
 Requirements:
 - [git](http://git-scm.com/)
 - [node.js](http://nodejs.org/)
