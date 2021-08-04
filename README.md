@@ -5,28 +5,27 @@ livechan is a live IRC like image board written in node.js.
 
 Configuration
 ====
-	Edit:
-		- config.js
-		- scripts/config_nginx.sh
-		- docker-compose.yml
-			-add livechan build args MAXMIND_LICENSE_KEY
+Edit:
+	- config.js
+	- scripts/config_nginx.sh
+	- docker-compose.yml
+		-add livechan build args MAXMIND_LICENSE_KEY
 
-	Then run:
+Then run:
 
 	./scripts/build_livechan.sh
 	./scripts/build_nginx.sh
-
 	./scripts/setup_livechan.sh
 	./scripts/set_livechan_password.sh
 
-	If using a local certificate:
-		./scripts/gen_nginx_cert_local.sh
-	Otherwise:
-		./scripts/gen_nginx_cert_remote.sh
+If using a local certificate:
+	./scripts/gen_nginx_cert_local.sh
+Otherwise:
+	copy your certificates to nginx/certs/ and add the proper filenames to scripts/config_nginx.sh
 
-	./scripts/setup_nginx.sh
+./scripts/setup_nginx.sh
 
-	If using your own nginx, copy nginx/sites-enabled/livechan to your nginx config
+If using your own nginx, copy nginx/sites-enabled/livechan to your nginx config
 
 Running
 ===
