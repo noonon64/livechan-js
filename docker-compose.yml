@@ -1,0 +1,48 @@
+version:  "3.9"
+
+services:
+  mongo:
+    image: mongo
+    volumes:
+      - mongo:/data/db
+    ports:
+      - "27017:27017"
+    env_file:
+      - .env
+      - .env.mongo
+  livechan:
+    build:
+      context: .
+      args:
+        MAXMIND_LICENSE_KEY: ADDME
+    ports:
+      - "0.0.0.0:8080:8080"
+    volumes:
+      - livechan:/home/livechan/persist
+      - public:/home/livechan/public/
+    env_file:
+      - .env
+      - .env.mongo
+      - .env.livechan
+    environment:
+      MONGO_HOSTNAME: "mongo"
+    # links:
+    #   - mongo
+    depends_on:
+      - mongo
+    restart: unless-stopped
+  nginx:
+    image: nginx
+    ports:
+      - "0.0.0.0:443:443"
+      - "0.0.0.0:80:80"
+    volumes:
+      - ./nginx:/etc/nginx/
+      - public:/public/
+    depends_on:
+      - livechan
+
+volumes:
+  mongo:
+  livechan:
+  public:

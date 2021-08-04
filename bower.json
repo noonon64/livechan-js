@@ -1,5 +1,5 @@
 {
-  "name": "LiveChan",
+  "name": "livechan",
   "version": "0.0.1",
   "description": "A live multimedia sharing chatroom.",
   "author": "emgram769",
@@ -14,7 +14,6 @@
   ],
   "devDependencies": {
     "jQuery": "1.11.0",
-    "html5shiv": "3.7.0",
     "highlight": "8.0"
   }
 }

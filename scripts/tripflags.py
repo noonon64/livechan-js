@@ -1,8 +1,8 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 import os
 from tripcode import tripcode
 
-scr = open('public/js/chat.js').read()
+scr = open('public/js/tripflags.js').read()
 
 files = [l.rsplit('"',2)[1] for l in scr.splitlines() if l.startswith('flags_image_table')]
 
@@ -20,5 +20,5 @@ print new_code
 
 new_scr = scr.replace('//  Table of tripflags', '//  Table of tripflags\n%s' % new_code)
 
-open('public/js/chat.js', 'w').write(new_scr)
+open('public/js/tripflags.js', 'w').write(new_scr)
 

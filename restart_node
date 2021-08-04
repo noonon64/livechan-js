@@ -1,3 +1,0 @@
-sudo kill $(pgrep -f "node lib/index.js");
-PORT=9000 nohup node lib/index.js &
-pkill python

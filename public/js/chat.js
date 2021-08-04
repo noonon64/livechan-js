@@ -13,7 +13,7 @@
     GNU Affero General Public License for more details.
 
     You should have received a copy of the GNU Affero General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 // for tabs
 
@@ -29,35 +29,58 @@ var highlighted_convos = ["General"];
 var start_press; // for long press detection
 var longpress = 400;
 
-var admins = ["Status","!!rr1C6aJjtk", "!!hSdTJ81KjY", "!!/3R6pgOFdo", "!!Q9nUUthOWU"]; // first trip here is used for server status posts
-var devs = ["!/b/suPrEmE", "!!3xVuTKubFw", "!!8Trs3SaoJ2"];
+var admins = ["Status","!!.xyhROITf2"]; // first trip here is used for server status posts
+var devs = ["!!fx4AWw5xPY"];
 /* if you look at source you are essentially helping out, so have some blue colored trips! --> bluerules, testing */
-var default_contribs = ["!!Tia6BuxIxc"];
-var bots = ["!!.w5vzYxkv6","!!RG5a8fLuMM"];
-var irc = ["!!SxKC741YKw"];
+var default_contribs = ["!!Bk9pc/hnuA"];
 
-var flags_image_table  = {};
-var flags_hover_strings = {};
-
-//  Table of tripflags
-
-// noflag
-flags_image_table["!RQ1r/nUdfw"]    = "GAY.png";
-flags_hover_strings["!RQ1r/nUdfw"]  ="Hidden With Pride"
-
-// deusvult
-flags_image_table["!depDNizZTI"]    = "stgeorge.png";
-flags_hover_strings["!depDNizZTI"]  = "DEUS VULT";
-
-// linux
-flags_image_table["!UyDUsdVyxo"]    = "linux.png";
-flags_hover_strings["!UyDUsdVyxo"]  = "Free as in freedom";
-
-// fbikun
-flags_image_table["!V8rJANBJ4M"] = "fbikun.png";
-flags_hover_strings["!V8rJANBJ4M"] = "I am not a federal employee";
-
-var hidden_trips = Object.keys(flags_image_table);
+var kot_names = {
+    'RU': 'Кот',
+    'BY': 'Кот',
+    'TR': 'Kedi',
+    'UA': 'Кiт',
+    'CH': 'Büsi',
+    'DE': 'Katze',
+    'DE': 'Kätzchen',
+    'AT': 'Katze',
+    'AT': 'Muschi',
+    'NL': 'Kat',
+    'KR': '고양이',
+    'FR': 'Chat',
+    'HU': 'Macska',
+    'HR': 'Mačka',
+    'RS': 'Мачка',
+    'MK': 'Мачка',
+    'IT': 'Gatto',
+    'PL': 'Kotek',
+    'SK': 'Mačka',
+    'BR': 'Gato',
+    'PT': 'Gato',
+    'ES': 'Gato',
+    'SE': 'Katt',
+    'SE': 'Kisse',
+    'NO': 'Katt',
+    'CZ': 'Kočička',
+    'GR': 'Γάτος',
+    'FI': 'Mirri',
+    'EE': 'Kass',
+    'EE': 'Kiisu',
+    'LV': 'Kaķis',
+    'LT': 'Katė',
+    'AM': 'Katu',
+    'KZ': 'Мысық',
+    'CN': '猫',
+    'AL': 'Dac',
+    'FO': 'Ketta',
+    'JP': 'ねこ',
+    'TH': 'แมว',
+    'BG': 'Котка',
+    'SI': 'Mačka',
+    'PH': 'Pusa',
+    'DK': 'Kat',
+    'NO': 'Katt',
+    'MA': 'Mušš',
+};
 
 var color_trips = {'!2kGkudiwr6': 'blue',
     '!4JkKbRZR5E': 'purple',
@@ -71,7 +94,6 @@ var color_trips = {'!2kGkudiwr6': 'blue',
     '!zbc0mftbJU': 'gray',
     '!k11/f4Kc0Y': 'white'};
 
-var special_trips = bots.concat(irc).concat(hidden_trips);
 var my_ids = [];
 var contribs = default_contribs;
 var ignored_ids;
@@ -91,7 +113,10 @@ var special_countries;
 var on_chat = function(d) {};
 
 var message_sound = new Audio('/js/message.mp3');
+var message_sound_onyou = new Audio('/js/message_onyou.ogg');
 message_sound.load();
+message_sound_onyou.load();
+
 
 function ajaxTranslate(textToTranslate, fromLanguage, toLanguage, callback) {
 	var p = {};
@@ -116,7 +141,7 @@ function ajaxTranslate(textToTranslate, fromLanguage, toLanguage, callback) {
 			console.log('error: status-'+status+',desc-'+error);
 		}
 	});
-} 
+}
 
 function humanFileSize(bytes, si) {
     "use strict";
@@ -241,8 +266,8 @@ function image_mouseover(obj, event, id) {
 
     var base_name = chat[id].image.match(/[\w\-\.]*$/)[0];
 
-    var extension = base_name.match(/\w*$/)[0];
-    if ($.inArray(extension, ["ogv", "webm", "mp4"]) > -1) {
+    var extension = base_name.match(/\w*$/)[0].toLowerCase(); /// .toLowerCase() is needed for videos, reposted via tg bot
+    if (["ogv", "webm", "mp4"].includes(extension)) {
         if (display === undefined) {
             display = $("<video/>");
         }
@@ -280,7 +305,7 @@ function board_link(dest,linked_chat){
             linked_chat = dest.split('/')[2];
             dest = dest.split('/')[1];
         } else {
-            linked_chat = "";  
+            linked_chat = "";
         }
     }
     dest = dest.replace(/\//g,"");
@@ -290,7 +315,7 @@ function board_link(dest,linked_chat){
     if (linked_chat !== "") {
         link_text += "#" + linked_chat;
         link_url += "#" + linked_chat;
-        if ($.inArray(parseInt(linked_chat, 10), my_ids)) {
+        if (my_ids.includes(parseInt(linked_chat, 10))) {
             link_text += " (You)";
         }
     }
@@ -310,8 +335,15 @@ function quote_link(dest) {
     link.attr("href", "#" + dest);
     link.data("dest", dest);
     link.text(function () {
-        //message_sound.play();
-        return ">>" + dest + (($.inArray(dest, my_ids) > -1) ? " (You)" : "");
+        if (my_ids.includes(dest)) {
+            if($("#sounds_onyou").prop('checked')){
+                message_sound_onyou.play();
+            }
+            //message_sound.play();
+            return ">>" + dest + " (You)";
+        } else {
+            return ">>" + dest;
+        }
     });
     link.click(quote_click);
     link.mouseover(quote_mouseover);
@@ -321,7 +353,7 @@ function quote_link(dest) {
     return link;
 }
 
-function remove_hash() { 
+function remove_hash() {
     history.pushState("", document.title, window.location.pathname
                                                        + window.location.search);
 }
@@ -357,7 +389,7 @@ function add_to_convo(convo){
         $(".sidebar_convo").toggleClass("sidebar_convo_dim",false);
         remove_hash();
     } else {
-        var convo_index = $.inArray(convo,highlighted_convos);
+        var convo_index = highlighted_convos.indexOf(convo);
         if (convo_index > -1){
             highlighted_convos.splice(convo_index,1);
             $(".sidebar_convo[data-convo='"+convo+"']").toggleClass("sidebar_convo_dim",true);
@@ -400,7 +432,7 @@ function draw_convos(){
         return;
     }
     $('.sidebar:first').empty();
-    
+
     var div_start = $("<div class='sidebar_convo' style='font-weight:bold'>All</div>");
     div_start.attr("data-convo","All");
     div_start.on( 'mousedown', function( e ) {
@@ -443,19 +475,19 @@ function draw_convos(){
                 .toggleClass('convo_img',true)
                 .css({maxWidth:'100%'}));
         }
-        
+
         var maxHeight = 70;
         convo_body_html
         .append(convo_body_picture)
         .append($("#chat_" + op).find(".chat_body").html())
         .toggleClass('sidebar_convo_body', true);
-        
-        
+
+
         convo_title_html.text(convo).css({
             fontWeight:'bold',
             maxWidth:'100%'
         });
-        
+
         convo_html.append(convo_body_html);
         convo_html.prepend(convo_title_html);
         convo_html.mouseover(function(e){
@@ -480,16 +512,16 @@ function draw_convos(){
         });
 
         div.append(convo_html);
-    
 
 
-        if($.inArray(convo,highlighted_convos)>-1){
+
+        if(highlighted_convos.includes(convo)){
             div.toggleClass("sidebar_convo_dim",false);
         } else {
             all_flag++;
             div.toggleClass("sidebar_convo_dim",true);
         }
-        
+
         div.on( 'mousedown', function( e ) {
             start = new Date().getTime();
         });
@@ -506,7 +538,7 @@ function draw_convos(){
                 swap_to_convo($(this).attr("data-convo"));
             }
         });
-        
+
         $('.sidebar:first').append(div);
     }
     if (all_flag){
@@ -521,15 +553,22 @@ var display;
 var windowWidth, windowHeight; // dimensions of window containing full image/video
 var frameLeft, frameTop;       // offset of subframe containing chat
 var displayAlign;              // CSS position attribute to set: "left" or "right"
-    
+
 // Generate blank post element
 function generate_post(id) {
     "use strict";
+    //var hat = "<img src=\"/images/icon-santa.png\" style=\"position:absolute;margin-top:-7px;margin-left:10px;z-index:3;\">";
+    //if (localStorage.theme == "/sad.css")
+    var hat = "";
+
     var post = $(
         "<article class='chat'>" +
             "<header class='chat_header'>" +
                 "<a class='chat_label' style='display: none;'/>" +
-                "<output class='chat_name'><output class='name_part'/><output class='trip_code'/><output class='flag tooltip'/></output>" +
+                "<output class='chat_name'><output class='name_part'/><output class='trip_code'/>" +
+                hat +
+                "<output class='flag tooltip'/>" +
+                "</output>" +
                 "<output class='chat_convo'/>" +
                 "<output class='chat_date'/>" +
                 "<output class='chat_number'/>" +
@@ -539,8 +578,8 @@ function generate_post(id) {
                 	"[<output class='delete_part'>delete</output> - "+
                 	"<output class='wipe_part'>wipe</output> - "+
                 	"<output class='warn_part'>warn</output> - "+
-                	"<output class='move_part'>move</output> - "+
                 	"<output class='ban_part'>ban</output> - "+
+                	"<output class='silent_part'>silent</output> - "+
                 	"<output class='country_part'>country</output>]"+
                 "</output>" +
             "</header>" +
@@ -553,15 +592,18 @@ function generate_post(id) {
             "<output class='chat_body'/>" +
         "</article>"
     );
+                //"<output style='float: right'>" +
+                //	"[<output class='mute_part'>mute</output>]"+
+                //"</output>" +
     post.attr("id", "chat_" + id);
-   
+
     post.find(".delete_part")
         .click(function() {
             if (!window.confirm("Are you sure you want to delete this post?"))
                 return;
             mod_delete_post(id, admin_pass);
         });
-        
+
     post.find(".wipe_part")
         .click(function() {
             if (!window.confirm("Are you sure you want to wipe all posts of this user?"))
@@ -575,14 +617,7 @@ function generate_post(id) {
                 return;
             mod_warn_poster(id, admin_pass);
         });
-        
-    post.find(".move_part")
-        .click(function() {
-            if (!window.confirm("Are you sure you want to move this post?"))
-                return;
-            mod_move_post(id, admin_pass);
-        });   
-             
+
     post.find(".ban_part")
         .click(function() {
             if (!window.confirm("Are you sure you want to ban this poster?"))
@@ -594,7 +629,14 @@ function generate_post(id) {
         .click(function() {
             alert(chat[id].country+' '+chat[id].country_name);
         });
-        
+
+    post.find(".silent_part")
+        .click(function() {
+            if (!window.confirm("Are you sure you want to shadowban this poster?"))
+                return;
+            mod_silent_poster(id, admin_pass);
+        });
+
     /*post.find(".mute_part")
         .click(function() {
             $('#body')[0].value='/ignore '+id;
@@ -773,8 +815,13 @@ function update_chat(new_data, first_load) {
     if (id === undefined) return;
     var new_post = (chat[id] === undefined || id == 0);
 
-		console.log($.inArray(new_data.identifier, ignored_ids) > -1);
-		if (ignored_ids && new_data && new_data.identifier && $.inArray(new_data.identifier, ignored_ids) > -1) {
+    // Set kot name
+    if (new_data.name == 'Kot') {
+	if (typeof new_data.country !== 'undefined')
+	        new_data.name = kot_names[new_data.country.split('-')[0]] || 'Kot';
+    }
+
+		if (ignored_ids && new_data && new_data.identifier && ignored_ids.includes(new_data.identifier)) {
 			return;
 		}
             if($("#sounds").prop('checked')){
@@ -802,11 +849,12 @@ function update_chat(new_data, first_load) {
             .attr("href", "/chat/" + data.chat + "#" + id)
             .text("/" + data.chat);
     }
-    
+
     if (changed.name) {
         post.find(".name_part").text(data.name);
     }
-    
+
+
     if (changed.identifier) {
     	post.find(".chat_identifier")
         .text(data.identifier.slice(50))
@@ -814,14 +862,9 @@ function update_chat(new_data, first_load) {
 	        background:'white'
         });
     }
-    
-    if (changed.country || (special_trips.indexOf(data.trip)>-1)) {
-    	if (data.trip == "!!SxKC741YKw") {
-    		var country = $("<img src='/icons/irc.png' style='height:10px;margin-bottom:1px;'/>");
-	        country_name = "IRC";
-	        post.find(".flag").attr("data-country", country_name);
-	        post.find(".flag").prepend(country);
-	} else if (hidden_trips.indexOf(data.trip) > -1) {
+
+    if (changed.country) {
+    	if (hidden_trips.indexOf(data.trip) > -1) {
             if ((data.trip in flags_image_table) && (data.trip in flags_hover_strings)) {
                 var country = $("<img src='/icons/tripflags/" + flags_image_table[data.trip] + "'/>");
                 post.find(".flag").attr("data-country", flags_hover_strings[data.trip]);
@@ -856,16 +899,16 @@ function update_chat(new_data, first_load) {
         	language = language.slice(0,2);
         	ajaxTranslate(post.find(".chat_body").text(), "", language, function(data){
 	        	post.find(".chat_body").append($("<span>").text(data).prepend($("<br>")));
-        	});	
+        	});
         	post.find(".flag").unbind("click");
         })
     }
     if (changed.trip) {
-        var special = ($.inArray(data.trip, special_trips)>-1);
-        var contrib = ($.inArray(data.trip, contribs) > -1);
-        var admin = ($.inArray(data.trip, admins) > -1);
-        var dev = ($.inArray(data.trip, devs) > -1);
-        var colortrip = ($.inArray(data.trip, Object.keys(color_trips)) > -1);
+        var special = special_trips.includes(data.trip);
+        var contrib = contribs.includes(data.trip);
+        var admin = admins.includes(data.trip);
+        var dev = devs.includes(data.trip);
+        var colortrip = Object.keys(color_trips).includes(data.trip);
         post.find(".trip_code")
 						.text(data.trip)
             .toggleClass("hidden", special || admin || dev || contrib || colortrip);
@@ -883,7 +926,7 @@ function update_chat(new_data, first_load) {
     if (changed.convo || changed.convo_id) {
         var is_op = (data.convo_id === data.count);
         if (data.convo !== "" && data.convo !== "General" &&
-            $.inArray(data.convo, Object.keys(convo_map)) < 0){
+            !Object.keys(convo_map).includes(data.convo)){
             convo_map[data.convo] = data.convo_id;
         }
         post.toggleClass("convo_op", is_op);
@@ -920,13 +963,13 @@ function update_chat(new_data, first_load) {
                 .text(base_name);
 
             if (extension === "ogg" || extension === "mp3" || extension === 'flac') {
-                audio_container.append($("<audio/>").attr({src: url_file, controls: "controls"}));
+                audio_container.append($("<audio/>").attr({src: url_file, controls: "controls", preload: "none"}));
             }
 
             var url_static = null;
             if (data.thumb) {
                 url_static = "/tmp/thumb/" + data.thumb.match(/[\w\-\.]*$/)[0];
-            } else if ($.inArray(extension, ["jpg", "jpeg", "png"]) > -1) {
+            } else if (["jpg", "jpeg", "png"].includes(extension)) {
                 url_static = url_file;
             }
             var url_anim = url_static;
@@ -950,7 +993,7 @@ function update_chat(new_data, first_load) {
             if ($("#thumbnail_mode").val() === "static") img_container.find(".thumb_static").css("display", "inline");
             if ($("#thumbnail_mode").val() === "animated") img_container.find(".thumb_anim").css("display", "inline");
         }
-    } 
+    }
     if (changed.image || changed.image_filesize || changed.image_width || changed.image_height || changed.image_filename) {
         var data_items = [];
         if (data.image_filesize !== undefined) {
@@ -980,430 +1023,35 @@ function update_chat(new_data, first_load) {
     if (changed.body) {
         // Remove any old backlinks to this post
         if (quote_links_to[id] !== undefined) {
-            $.each(quote_links_to[id], function() {
-                if (this.hasClass("back_link")) this.remove();
+            quote_links_to[id].forEach(function(link) {
+                if (link.hasClass("back_link")) link.remove();
             });
         }
-
         // Process body markup
-        var ref_ids = [];
-        var rules = [
-            [/>>>\/([a-z0-9]+)(?:[#\/](\d+))?/g, function(m, o) {
-                o.push(board_link(m[1], m[2]));
-            }],
-            [/(?:\{(\d+)\}|>>(\d+))/g, function(m, o) {
-                var ref_id = parseInt(m[1] ? m[1] : m[2], 10);
-                if ($.inArray(ref_id, ref_ids) === -1) ref_ids.push(ref_id);
-                o.push(quote_link(ref_id));
-            }],
-            [/^>+/mg, function(m, o) {
-                var body = this.parse(rules, /$/mg);
-                o.push($("<output class='greentext'/>").text(m[0]).append(body));
-            }],
-            [/\r?\n/g, function(m, o) {
-                o.push($("<br>"));
-            }],
-            [/\[code(?: language=([a-z]+))?\](?:\r?\n)?/g, function(m, o) {
-                var body = this.no_parse(/\[\/code\]/g);
-                try {
-                    if (m[1]) {
-                        try {
-                            o.push($("<pre class='code'/>").html($("<code/>").html(hljs.highlight(m[1], body).value)));
-                        } catch(e) {
-                            o.push($("<pre class='code'/>").html($("<code/>").html(hljs.highlightAuto(body).value)));
-                        }
-                    } else {
-                        o.push($("<pre class='code'/>").html($("<code/>").html(hljs.highlightAuto(body).value)));
-                    }
-                } catch(e) {
-                    o.push($("<pre class='code'/>").text(body));
-                }
-            }],
-            [/\[spoiler\]/g, function(m, o) {
-                var body = this.parse(rules, /\[\/spoiler\]/g);
-                o.push($("<span class='spoiler'/>").append(body));
-            }],
-            [/(?:https?:\/\/)?(?:www\.)?(?:twitter\.com)\/(.*)/g, function(m, o) {
-                var main = $("<span/>");
-                var url = m[0][0] == 'y' ? "https://"+m[0] : m[0];
-                var elem = $("<a target='_blank'/>").attr("href", url).text(m[0]);
-                var embed = $("<span>(embed)</span>").css({cursor:"pointer", fontSize:'10px'});
-                main.append(elem, " ", embed);
-                o.push(main);
-                var embedded = false;
-                embed.click(function(e) {
-                    e.stopPropagation();
-                    if (embedded) {
-                        main.find("div.twit").remove();
-                    } else {
-                        $.ajax({
-                            url:'https://publish.twitter.com/oembed?url='+url,
-                            dataType:'jsonp',
-                            success:function(data){ 
-                                main.append('<div class="twit">'+data.html+'</div>');
-                            }
-                        });
-                    }
-                    embedded = !embedded;
-                    embed.text(embedded ? "(unembed)" : "(embed)");
-                    var post = main.parents(".chat");
-                    post.toggleClass('chat_embed', embedded);// post.find("div.twit").length > 0);
-                });
-            }],
-            [/(?:https?:\/\/)?(?:www\.)?(?:instagram\.com)\/(.*)/g, function(m, o) {
-                var main = $("<span/>");
-                var url = m[0][0] == 'y' ? "https://"+m[0] : m[0];
-                var elem = $("<a target='_blank'/>").attr("href", url).text(m[0]);
-                var embed = $("<span>(embed)</span>").css({cursor:"pointer", fontSize:'10px'});
-                main.append(elem, " ", embed);
-                o.push(main);
-                var embedded = false;
-                embed.click(function(e) {
-                    e.stopPropagation();
-                    if (embedded) {
-                        main.find("div.twit").remove();
-                    } else {
-                        $.ajax({
-                            url:'https://api.instagram.com/oembed?url='+url,
-                            dataType:'jsonp',
-                            success:function(data){ 
-                                main.append('<div class="twit">'+data.html+'</div>');
-                            }
-                        });
-                    }
-                    embedded = !embedded;
-                    embed.text(embedded ? "(unembed)" : "(embed)");
-                    var post = main.parents(".chat");
-                    post.toggleClass('chat_embed', embedded);// post.find("div.twit").length > 0);
-                });
-            }],
-            [/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=)?(\S+)/g, function(m, o) {
-                var main = $("<span/>");
-                var url = m[0][0] == 'y' ? "https://"+m[0] : m[0];
-                var elem = $("<a target='_blank'/>").attr("href", url).text(m[0]);
-                var embed = $("<span>(embed)</span>").css({cursor:"pointer", fontSize:'10px'});
-                main.append(elem, " ", embed);
-                o.push(main);
-                var embedded = false;
-                embed.click(function(e) {
-                    e.stopPropagation();
-                    if (embedded) {
-                        main.find("iframe").remove();
-                    } else {
-                        var yt = $("<iframe width='560' height='315' style='max-width:100%;' frameborder='0' allowfullscreen></iframe>")
-                            .attr("src", "https://www.youtube.com/embed/"+m[1]).css({float:"left", marginRight:'5px'});
-                        main.append(yt);
-                    }
-                    embedded = !embedded;
-                    embed.text(embedded ? "(unembed)" : "(embed)");
-                    var post = main.parents(".chat");
-                    post.toggleClass('chat_embed', post.find("iframe").length > 0);
-                });
-                get_youtube_data(m[1],elem);
-            }],
-            [/https?:\/\/\S+()/g, function(m, o) { // stupid extra () is for some syntax highlighters to play nice.
-                o.push($("<a target='_blank'/>").attr("href", m[0]).text(m[0]));
-            }],
-            [/\[b\]/g, function(m, o) {
-                var body = this.parse(rules, /\[\/b\]/g);
-                o.push($("<span style='font-weight: bold;'/>").append(body));
-            }],
-            [/\[i\]/g, function(m, o) {
-                var body = this.parse(rules, /\[\/i\]/g);
-                o.push($("<span style='font-style: italic;'/>").append(body));
-            }],
-            [/\[u\]/g, function(m, o) {
-                var body = this.parse(rules, /\[\/u\]/g);
-                o.push($("<span style='text-decoration: underline;'/>").append(body));
-            }],
-            [/\[s\]/g, function(m, o) {
-                var body = this.parse(rules, /\[\/s\]/g);
-                o.push($("<span style='text-decoration: line-through;'/>").append(body));
-            }],
-            [/\[ree\]/g, function(m, o) {
-                var body = this.parse(rules, /\[\/ree\]/g);
-                o.push($("<article class='shake'/>").append(body));
-            }],
-            [/\[color=([#\w]+)\]/g, function(m, o) {
-                var body = this.parse(rules, /\[\/color\]/g);
-                if ($('#spoilers').prop("checked")) {
-                	o.push($("<span/>").css("color", m[1]).append(body));
-                } else {
-                	o.push($("<span/>").append(body));
-                }
-            }],
-            [/\[flag\]/g, function(m, o) {
-                var body = this.parse(rules, /\[\/flag\]/g);
-                if (special_countries) {
-                	o.push($("<img/>").attr("src", encodeURI("/icons/countries/"+body[0].data.toUpperCase()+".png")).css({height:"44px"}));
-                } else {
-                	o.push($("<span>").text(body[0].data.toUpperCase()));
-                }
-            }],
-            [/\[st\]/g, function(m, o) {
-                var body = this.parse(rules, /\[\/st\]/g);
-                o.push($("<img/>").attr("src", encodeURI("/images/stickers/"+body[0].data.replace('/','')+".png")).css({'min-height':"64px"}).css({'max-height':'100px'}).click(sticker_click));
-            }],
-            [/\[noparse\]/g, function(m, o) {
-                var body = this.no_parse(/\[\/noparse\]/g);
-                o.push(document.createTextNode(body));
-            }]
-        ];
-        var smiles = [
-            [/\:\-\)|\:\)|\=\)/g, function(m, o) {
-                var body = this.parse(rules, /\:\-\)|\:\)|\=\)/g);
-                o.push($("<img/>").attr("src", "/icons/smiles/ab.gif"));
-            }],
-            [/\:\-\(|\:\(|\;\(/g, function(m, o) {
-                var body = this.parse(rules, /\:\-\(|\:\(|\;\(/g);
-                o.push($("<img/>").attr("src", "/icons/smiles/ac.gif"));
-            }],
-            [/\:\-P/g, function(m, o) {
-                var body = this.parse(rules, /\:\-P/g);
-                o.push($("<img/>").attr("src", "/icons/smiles/ae.gif"));
-            }],
-            [/8\-\)/g, function(m, o) {
-                var body = this.parse(rules, /8\-\)/g);
-                o.push($("<img/>").attr("src", "/icons/smiles/af.gif"));
-            }],
-            [/\:\-D/g, function(m, o) {
-                var body = this.parse(rules, /\:\-D/g);
-                o.push($("<img/>").attr("src", "/icons/smiles/ag.gif"));
-            }],
-            [/\:\-\[/g, function(m, o) {
-                var body = this.parse(rules, /\:\-\[/g);
-                o.push($("<img/>").attr("src", "/icons/smiles/ah.gif"));
-            }],
-            [/\=\-O/g, function(m, o) {
-                var body = this.parse(rules, /\=\-O/g);
-                o.push($("<img/>").attr("src", "/icons/smiles/ai.gif"));
-            }],
-            [/\:\'\(/g, function(m, o) {
-                var body = this.parse(rules, /\:\'\(/g);
-                o.push($("<img/>").attr("src", "/icons/smiles/ak.gif"));
-            }],
-            [/\:\-X|\:\-x/g, function(m, o) {
-                var body = this.parse(rules, /\:\-X|\:\-x/g);
-                o.push($("<img/>").attr("src", "/icons/smiles/al.gif"));
-            }],
-            [/\>\:o/g, function(m, o) {
-                var body = this.parse(rules, /\>\:o/g);
-                o.push($("<img/>").attr("src", "/icons/smiles/am.gif"));
-            }],
-            [/\:\-\|/g, function(m, o) {
-                var body = this.parse(rules, /\:\-\|/g);
-                o.push($("<img/>").attr("src", "/icons/smiles/an.gif"));
-            }],
-            [/\:\-\\|\:\-\//g, function(m, o) {
-                var body = this.parse(rules, /\:\-\\|\:\-\//g);
-                o.push($("<img/>").attr("src", "/icons/smiles/ao.gif"));
-            }],
-            [/\*JOKINGLY\*/g, function(m, o) {
-                var body = this.parse(rules, /\*JOKINGLY\*/g);
-                o.push($("<img/>").attr("src", "/icons/smiles/ap.gif"));
-            }],
-            [/\]\:\-\>/g, function(m, o) {
-                var body = this.parse(rules, /\]\:\-\>/g);
-                o.push($("<img/>").attr("src", "/icons/smiles/aq.gif"));
-            }],
-            [/\[\:\-\}/g, function(m, o) {
-                var body = this.parse(rules, /\[\:\-\}/g);
-                o.push($("<img/>").attr("src", "/icons/smiles/ar.gif"));
-            }],
-            [/\:\-\!/g, function(m, o) {
-                var body = this.parse(rules, /\:\-\!/g);
-                o.push($("<img/>").attr("src", "/icons/smiles/at.gif"));
-            }],
-            [/\*TIRED\*/g, function(m, o) {
-                var body = this.parse(rules, /\*TIRED\*/g);
-                o.push($("<img/>").attr("src", "/icons/smiles/au.gif"));
-            }],
-            [/\*STOP\*/g, function(m, o) {
-                var body = this.parse(rules, /\*STOP\*/g);
-                o.push($("<img/>").attr("src", "/icons/smiles/av.gif"));
-            }],
-            [/\*THUMBS|UP\*/g, function(m, o) {
-                var body = this.parse(rules, /\*THUMBS|UP\*/g);
-                o.push($("<img/>").attr("src", "/icons/smiles/ay.gif"));
-            }],
-            [/\*DRINK\*/g, function(m, o) {
-                var body = this.parse(rules, /\*DRINK\*/g);
-                o.push($("<img/>").attr("src", "/icons/smiles/az.gif"));
-            }],
-            [/\*HELP\*/g, function(m, o) {
-                var body = this.parse(rules, /\*HELP\*/g);
-                o.push($("<img/>").attr("src", "/icons/smiles/bc.gif"));
-            }],
-            [/\\m\//g, function(m, o) {
-                var body = this.parse(rules, /\\m\//g);
-                o.push($("<img/>").attr("src", "/icons/smiles/bd.gif"));
-            }],
-            [/\%\)/g, function(m, o) {
-                var body = this.parse(rules, /\%\)/g);
-                o.push($("<img/>").attr("src", "/icons/smiles/be.gif"));
-            }],
-            [/\*OK\*/g, function(m, o) {
-                var body = this.parse(rules, /\*OK\*/g);
-                o.push($("<img/>").attr("src", "/icons/smiles/bf.gif"));
-            }],
-            [/\*SORRY\*/g, function(m, o) {
-                var body = this.parse(rules, /\*SORRY\*/g);
-                o.push($("<img/>").attr("src", "/icons/smiles/bh.gif"));
-            }],
-            [/\*ROFL\*|\*LOL\*/g, function(m, o) {
-                var body = this.parse(rules, /\*ROFL\*|\*LOL\*/g);
-                o.push($("<img/>").attr("src", "/icons/smiles/bj.gif"));
-            }],
-            [/\*NO\*/g, function(m, o) {
-                var body = this.parse(rules, /\*NO\*/g);
-                o.push($("<img/>").attr("src", "/icons/smiles/bl.gif"));
-            }],
-            [/\*CRAZY\*/g, function(m, o) {
-                var body = this.parse(rules, /\*CRAZY\*/g);
-                o.push($("<img/>").attr("src", "/icons/smiles/bm.gif"));
-            }],
-            [/\*DUNNO\*/g, function(m, o) {
-                var body = this.parse(rules, /\*DUNNO\*/g);
-                o.push($("<img/>").attr("src", "/icons/smiles/bn.gif"));
-            }],
-            [/\*DANCE\*/g, function(m, o) {
-                var body = this.parse(rules, /\*DANCE\*/g);
-                o.push($("<img/>").attr("src", "/icons/smiles/bo.gif"));
-            }],
-            [/\*YAHOO\*/g, function(m, o) {
-                var body = this.parse(rules, /\*YAHOO\*/g);
-                o.push($("<img/>").attr("src", "/icons/smiles/bp.gif"));
-            }],
-            [/\*HI\*/g, function(m, o) {
-                var body = this.parse(rules, /\*HI\*/g);
-                o.push($("<img/>").attr("src", "/icons/smiles/bq.gif"));
-            }],
-            [/\*BYE\*/g, function(m, o) {
-                var body = this.parse(rules, /\*BYE\*/g);
-                o.push($("<img/>").attr("src", "/icons/smiles/br.gif"));
-            }],
-            [/\*YES\*/g, function(m, o) {
-                var body = this.parse(rules, /\*YES\*/g);
-                o.push($("<img/>").attr("src", "/icons/smiles/bs.gif"));
-            }],
-            [/\;D/g, function(m, o) {
-                var body = this.parse(rules, /\;D/g);
-                o.push($("<img/>").attr("src", "/icons/smiles/bt.gif"));
-            }],
-            [/\*WALL\*/g, function(m, o) {
-                var body = this.parse(rules, /\*WALL\*/g);
-                o.push($("<img/>").attr("src", "/icons/smiles/bu.gif"));
-            }],
-            [/\*SCRATCH\*/g, function(m, o) {
-                var body = this.parse(rules, /\*SCRATCH\*/g);
-                o.push($("<img/>").attr("src", "/icons/smiles/bw.gif"));
-            }],
-            [/\*BANANA\*/g, function(m, o) {
-                var body = this.parse(rules, /\*BANANA\*/g);
-                o.push($("<img/>").attr("src", "/icons/smiles/banana.gif"));
-            }],
-            [/\*SUP\*/g, function(m, o) {
-                    var body = this.parse(rules, /\*SUP\*/g);
-                        o.push($("<img/>").attr("src", "/icons/smiles/bg.gif"));
-            }],
-            [/\*YEEES\!\*/g, function(m, o) {
-                    var body = this.parse(rules, /\*YEEES\!\*/g);
-                        o.push($("<img/>").attr("src", "/icons/smiles/bx.gif"));
-            }],
-            [/\*SMOKE\*/g, function(m, o) {
-                    var body = this.parse(rules, /\*SMOKE\*/g);
-                        o.push($("<img/>").attr("src", "/icons/smiles/by.gif"));
-            }],
-            [/\*GAMER\*/g, function(m, o) {
-                    var body = this.parse(rules, /\*GAMER\*/g);
-                        o.push($("<img/>").attr("src", "/icons/smiles/cc.gif"));
-            }],
-            [/\*BLACKEYE\*/g, function(m, o) {
-                    var body = this.parse(rules, /\*BLACKEYE\*/g);
-                        o.push($("<img/>").attr("src", "/icons/smiles/cg.gif"));
-            }],
-            [/\*SEARCH\*/g, function(m, o) {
-                    var body = this.parse(rules, /\*SEARCH\*/g);
-                        o.push($("<img/>").attr("src", "/icons/smiles/ci.gif"));
-            }],
-            [/\*FOCUS\*/g, function(m, o) {
-                    var body = this.parse(rules, /\*FOCUS\*/g);
-                        o.push($("<img/>").attr("src", "/icons/smiles/ck.gif"));
-            }],
-            [/\*HUNTER\*/g, function(m, o) {
-                    var body = this.parse(rules, /\*HUNTER\*/g);
-                        o.push($("<img/>").attr("src", "/icons/smiles/cl.gif"));
-            }],
-            [/X\)/g, function(m, o) {
-                    var body = this.parse(rules, /X\)/g);
-                        o.push($("<img/>").attr("src", "/icons/smiles/dc.gif"));
-            }],
-            [/\*JOB\*/g, function(m, o) {
-                    var body = this.parse(rules, /\*JOB\*/g);
-                        o.push($("<img/>").attr("src", "/icons/smiles/de.gif"));
-            }],
-            [/\*THANK\*/g, function(m, o) {
-                    var body = this.parse(rules, /\*THANK\*/g);
-                        o.push($("<img/>").attr("src", "/icons/smiles/dh.gif"));
-            }],
-            [/\*LAZY\*/g, function(m, o) {
-                    var body = this.parse(rules, /\*LAZY\*/g);
-                        o.push($("<img/>").attr("src", "/icons/smiles/dj.gif"));
-            }],
-            [/\*WIZARD\*/g, function(m, o) {
-                    var body = this.parse(rules, /\*WIZARD\*/g);
-                        o.push($("<img/>").attr("src", "/icons/smiles/dm.gif"));
-            }],
-            [/\*TEASE\*/g, function(m, o) {
-                    var body = this.parse(rules, /\*TEASE\*/g);
-                        o.push($("<img/>").attr("src", "/icons/smiles/dp.gif"));
-            }],
-            [/\*TRAINING\*/g, function(m, o) {
-                    var body = this.parse(rules, /\*TRAINING\*/g);
-                        o.push($("<img/>").attr("src", "/icons/smiles/du.gif"));
-            }],
-            [/\*POPCORN\*/g, function(m, o) {
-                    var body = this.parse(rules, /\*POPCORN\*/g);
-                        o.push($("<img/>").attr("src", "/icons/smiles/dw.gif"));
-            }],
-        ];
-        rules = rules.concat(smiles);
-        var body = new Parser(data.body).parse(rules);
-        post.find(".chat_body").empty().append(body);
-        
-        var for_you = /\(You\)/.test(post.find(".quote_link").text());
-        
-        if (for_you) {
-			post.toggleClass("chat_highlight", true);
-		}
-		
-		if (admin_pass != "" && /(admin|dev(eloper)?)/.test(post.find(".chat_body").text().toLowerCase())) {
-			post.toggleClass("chat_highlight", true);
-			for_you = true;
-		}
-		
-		if (highlight_regex && highlight_regex.test(post.find(".chat_body").text().toLowerCase())) {
-			post.toggleClass("chat_highlight", true);
-			for_you = true;
-		}
 
-        // Create new backlinks
-        $(ref_ids).each(function () {
-            var link = quote_link(id);
-            link.addClass("back_link");
-            var their_refs = $("#chat_" + this + " .chat_refs");
-            if (their_refs.length === 0) {
-                if (future_ids[this] === undefined) future_ids[this] = $("<output />");
-                future_ids[this].append(" ", link);
-            } else {
-                their_refs.append(" ", link);
-            }
-        });
+        apply_rules(data, post, id);
+        var for_you = /\(You\)/.test(post.find(".quote_link").text());
+
+        if (for_you) {
+            post.toggleClass("chat_highlight", true);
+        }
+
+        if (admin_pass != "" && /\b(admin|dev(eloper)?)\b/.test(post.find(".chat_body").text().toLowerCase())) {
+            post.toggleClass("chat_highlight", true);
+            for_you = true;
+        }
+
+        if (highlight_regex && highlight_regex.test(post.find(".chat_body").text().toLowerCase())) {
+            post.toggleClass("chat_highlight", true);
+            for_you = true;
+        }
+        //post.find(".chat_body").text(toL33t(post.find(".chat_body").text()));
+        //post.find(".chat_body").text(transliterate(post.find(".chat_body").text(), true));
     }
 
     if (new_post) {
         // Place post conversation at top of list
-        var convo_index = $.inArray(data.convo, convos);
+        var convo_index = convos.includes(data.convo);
         if (convo_index < 0) {
             convos.push(data.convo);
             //highlighted_convos.push(data.convo);
@@ -1420,7 +1068,7 @@ function update_chat(new_data, first_load) {
         if (!first_load) {
             post.css('opacity', '0');
         }
-        
+
         if (!first_load) {
 	        var keys = Object.keys(chat);
 	        var count_convo = 0;
@@ -1434,7 +1082,7 @@ function update_chat(new_data, first_load) {
 				    while (data.convo !== chat[keys[i]].convo || chat[keys[i]].convo_id === chat[keys[i]].count) {
 				    	i++;
 				    }
-				    
+
 				    var old_chat = keys[i];
 				    $("#chat_"+old_chat).remove();
 				    delete chat[old_chat];
@@ -1443,8 +1091,9 @@ function update_chat(new_data, first_load) {
 			    }
 		    }
 	    }
-	    
-        
+
+        var post_id = post.attr('id').split("_")[1];
+
         insert_post(post, data.chat);
         if (!first_load) {
             post.animate({
@@ -1533,7 +1182,7 @@ function apply_filter(posts) {
     } else if (value === "filter"){*/
         posts.toggleClass(function () {
             var id = parseInt(this.id.match(/\d+/)[0], 10);
-            return ($.inArray(chat[id].convo, highlighted_convos) > -1) ? '' : 'chat_hidden';
+            return highlighted_convos.includes(chat[id].convo) ? '' : 'chat_hidden';
         }, true);
    // }
 }
@@ -1595,38 +1244,47 @@ function split_channel(channel){
 }
 
 /* pulls the data */
-function pull_chats(channel, convo) {
-	$.ajax({
+function pull_chats(new_channel, new_post) {
+    var draw_data=[];
+    on_chat = function(data) {
+        draw_data.push(data);
+    }
+    $.ajax({
         type: "GET",
-        url: "/data/" + channel,
-        data: {limit: max_chats}
-    }).done(function (data_chat) {
-        draw_data = draw_data.concat(data_convo, data_chat);
-        draw_data.sort(function(a, b) {return b.count - a.count;});
-        draw_chat(draw_data);
-        $('.chats').toggleClass('shown', true);
-        on_chat = function(d) {
-            update_chat(d);
-            if($("#autoscroll").prop('checked')) {
-                var current_hover = $(".chat_img_cont:hover");
-                if (current_hover.length == 0) {
-                    scroll();
-                } else {
-                    function deferred_scroll() {
-                        current_hover.off("mouseout", deferred_scroll);
+        url: "/data_convo/" + new_channel
+    }).done(function (data_convo) {
+        $.ajax({
+            type: "GET",
+            url: "/data/" + new_channel,
+            data: {limit: max_chats}
+        }).done(function (data_chat) {
+            draw_data = draw_data.concat(data_convo, data_chat);
+            draw_data.sort(function(a, b) {return b.count - a.count;});
+            draw_chat(draw_data);
+            $('.chats').toggleClass('shown', true);
+            on_chat = function(d) {
+                update_chat(d);
+                if($("#autoscroll").prop('checked')) {
+                    var current_hover = $(".chat_img_cont:hover");
+                    if (current_hover.length == 0) {
                         scroll();
+                    } else {
+                        function deferred_scroll() {
+                            current_hover.off("mouseout", deferred_scroll);
+                            scroll();
+                        }
+                        current_hover.on("mouseout", deferred_scroll);
                     }
-                    current_hover.on("mouseout", deferred_scroll);
                 }
-            }
-        };
-        setTimeout(function() {
-            if (new_post !== "") {
-                if ($("#chat_"+linked_post).length) $("#chat_"+linked_post)[0].scrollIntoView();
-            } else {
-                scroll();
-            }
-        }, 100);
+            };
+            setTimeout(function () {
+                if (new_post) {
+                    if ($("#chat_" + linked_post).length) $("#chat_" + linked_post)[0].scrollIntoView();
+                } else {
+                    scroll();
+                }
+            }, 100);
+        });
     });
 }
 
@@ -1690,7 +1348,7 @@ function set_channel(new_channel, new_post, no_push_state, tab) {
     // indicate new channel
     $('#board_select').val(new_channel);
     $('#comment-form').attr('action', '/chat/' + new_channel);
-    title = "livechan" + (new_channel === "home" ? "" : " - /" + new_channel);
+    title = config.name + (new_channel === "home" ? "" : " - /" + new_channel);
     window.document.title = title;
 
     // hide form, sidebar on /home, /all pages
@@ -1730,46 +1388,7 @@ function set_channel(new_channel, new_post, no_push_state, tab) {
         socket.emit('subscribe', new_channel);
 
         // get posts
-        var draw_data = [];
-        on_chat = function(data) {
-            draw_data.push(data);
-        }
-        $.ajax({
-            type: "GET",
-            url: "/data_convo/" + new_channel
-        }).done(function (data_convo) {
-            $.ajax({
-                type: "GET",
-                url: "/data/" + new_channel
-            }).done(function (data_chat) {
-                draw_data = draw_data.concat(data_convo, data_chat);
-                draw_data.sort(function(a, b) {return b.count - a.count;});
-                draw_chat(draw_data);
-                $('.chats').toggleClass('shown', true);
-                on_chat = function(d) {
-                    update_chat(d);
-                    if($("#autoscroll").prop('checked')) {
-                        var current_hover = $(".chat_img_cont:hover");
-                        if (current_hover.length == 0) {
-                            scroll();
-                        } else {
-                            function deferred_scroll() {
-                                current_hover.off("mouseout", deferred_scroll);
-                                scroll();
-                            }
-                            current_hover.on("mouseout", deferred_scroll);
-                        }
-                    }
-                };
-                setTimeout(function() {
-                    if (new_post !== "") {
-                        if ($("#chat_"+linked_post).length) $("#chat_"+linked_post)[0].scrollIntoView();
-                    } else {
-                        scroll();
-                    }
-                }, 100);
-            });
-        });
+        pull_chats(new_channel, new_post);
     } else {
         $('.chats').append($('.home_screen').contents().clone());
         $('.chats').toggleClass('shown', true);
@@ -1905,12 +1524,5 @@ $(document).ready(function () {
     });
     
     entry_hash = window.location.hash;
-
-    /*setInterval(function() {
-        $('.shake').toggleClass('shake-vertical');
-        setTimeout(function() {
-            $('.shake').toggleClass('shake-vertical');
-        }, 500);
-    }, 5000);*/
 
 });

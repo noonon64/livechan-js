@@ -1,0 +1,7 @@
+Dockerfile
+docker-compose.yml
+.docker/
+.env*
+.git*
+node_modules/
+package-lock.json

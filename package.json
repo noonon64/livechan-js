@@ -1,46 +1,56 @@
 {
-  "name": "LiveChan",
-  "version": "0.0.1",
-  "description": "A live multimedia sharing chatroom.",
-  "main": "web.js",
-  "_comment_1": "we should probably change the main script, it shouldn't start a server, says http://package.json.nodejitsu.com/ (hover over the main part on there)",
-  "scripts": {
-    "start": "node lib/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/emgram769/live4chan.git"
-  },
-  "keywords": [
-    "live",
-    "ajax",
-    "imageboard",
-    "chat"
-  ],
-  "author": "emgram769",
-  "license": "AGPL-3.0",
-  "dependencies": {
-    "bcrypt": "0.7.7",
-    "captcha": "0.0.4",
-    "canvas": "~1.1.3",
-    "express": "3.4.8",
-    "logfmt": "0.18.1",
-    "socket.io": "0.9.16",
-    "tripcode": "1.2.0",
-    "mongoose": "3.8.6",
-    "async": "0.2.10",
-    "socket.io-stream": "0.5.2",
-    "read": "1.0.5",
-    "geoip": "*"
-  },
-  "devDependencies": {
-    "bower": "1.2.8",
-    "uglify-js": "2.4.12"
-  },
-  "engine": "node >= 0.10.0",
-  "bugs": {
-    "url": "https://github.com/emgram769/live4chan/issues"
-  },
-  "homepage": "https://github.com/emgram769/live4chan"
+    "name": "LiveChan",
+    "version": "0.0.1",
+    "description": "A live multimedia sharing chatroom.",
+    "main": "web.js",
+    "_comment_1": "we should probably change the main script, it shouldn't start a server, says http://package.json.nodejitsu.com/ (hover over the main part on there)",
+    "scripts": {
+        "start": "node lib/index.js",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/emgram769/live4chan.git"
+    },
+    "keywords": [
+        "live",
+        "ajax",
+        "imageboard",
+        "chat"
+    ],
+    "author": "emgram769",
+    "license": "AGPL-3.0",
+    "dependencies": {
+        "async": "^3.2.0",
+        "bcrypt": "^5.0.1",
+        "body-parser": "^1.19.0",
+        "cookie-parser": "^1.4.5",
+        "express": "^4.17.1",
+        "express-session": "^1.17.2",
+        "geolite2": "^3.4.0",
+        "logfmt": "^1.3.2",
+        "maxmind": "^4.3.0",
+        "mongoose": "^5.12.14",
+        "multer": "^1.4.2",
+        "read": "^1.0.7",
+        "socket.io": "^4.1.2",
+        "socket.io-stream": "^0.5.3",
+        "tripcode": "^1.3.5",
+        "uuid": "^8.3.2"
+    },
+    "devDependencies": {
+        "bower": "^1.8.12",
+        "uglify-js": "3.13.9"
+    },
+    "engine": "node >= 16.0.0",
+    "bugs": {
+        "url": "https://github.com/emgram769/live4chan/issues"
+    },
+    "homepage": "https://github.com/emgram769/live4chan",
+    "geolite2": {
+        "selected-dbs": [
+            "City",
+            "Country"
+        ]
+    }
 }

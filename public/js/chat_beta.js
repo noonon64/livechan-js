@@ -38,7 +38,7 @@ $('document').ready(function(){
 });
 
 function drawConvoList(data) {
-	if (typeof(data) !== "undefined" && (convos.indexOf(data.convo) < 0)) {
+	if (typeof(data) !== "undefined" && !convos.includes(data.convo)) {
 		console.log(data.convo);
 		convos.push(data.convo);
 	}
@@ -49,12 +49,12 @@ function drawConvoList(data) {
 		(function(convo){
 		var convoElement = $("<div>")
 			.toggleClass("chat_convo_element", true)
-			.toggleClass("chat_convo_highlighted", (sections[currentSection].convos.indexOf(convo) >= 0))
+			.toggleClass("chat_convo_highlighted", sections[currentSection].convos.includes(convo))
 			.css({
 				border: "1px solid "+getRandomColor(hashString(convo))
 			})
 			.click(function(){
-				if (sections[currentSection].convos.indexOf(convo) < 0) {
+				if (!sections[currentSection].convos.includes(convo)) {
 					sections[currentSection].getSubscription(currentChannel, convo);
 				}
 				drawConvoList();
@@ -87,26 +87,20 @@ function sectionProto(channel) {
 }
 
 sectionProto.prototype.addConvo = function(convo) {
-	if (this.convos.indexOf(convo) >= 0) {
-		return;
-	} else {
+	if (!this.convos.includes(convo)) {
 		this.convos.push(convo);
-		return;
 	}
 };
 
 sectionProto.prototype.removeConvo = function(convo) {
-	if (this.convos.indexOf(convo) >= 0) {
+	if (this.convos.includes(convo)) {
 		var index = array.indexOf(convo);
 		this.convos.splice(index, 1);
-		return;
 	} else {
-		return;
-	}
 };
 
 sectionProto.prototype.drawChat = function(chat) {
-	if (this.convos.indexOf(chat.convo) < 0) {
+	if (!this.convos.includes(chat.convo)) {
 		return;
 	}
 	
@@ -339,7 +333,7 @@ function createChatElement(chat) {
 	        post.find(".flag").prepend(country);
     	} else {
 	        var country_name = "";
-	        //if (special_countries.indexOf(data.country)>-1) {
+	        //if (special_countries.inlucdes(data.country)) {
 	        if (chat.country[2] == "-") {
 	            var state = $("<img src='/icons/countries/"+chat.country+".png'/>");
 	            post.find(".flag").prepend(state);

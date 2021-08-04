@@ -18,8 +18,8 @@
 
 var auto_post = false;
 var last_post = "";
-var cool_down_timer = 0;
-var cool_down_interval;
+var cool_down_timer = true ;
+var cool_down_interval = 1000;
 var admin_mode = false;
 var admin_pass = ""; // pass to auth with server for admin commands, set by /admin command
 var highlight_regex = /.^/; // matches nothing
@@ -50,23 +50,59 @@ navigator.getMedia = (
     navigator.msGetUserMedia
 );
 
+function on_delete(data) {
+    var chat_id = parseInt(data['count']);
+    delete chat[chat_id];
+    $('#chat_'+chat_id).remove();
+}
+
 /* stuff to do on load */
 $(document).ready(function () {
     "use strict";
 
     /* set up socket */
-    socket = io.connect('/', {secure: (location.protocol === "https:")});
-    socket.on('chat', function(data) {on_chat(data);});
-    socket.on('alert', div_alert);
-    socket.on('silent', silent_poster);
-    socket.on('refresh', function() {setTimeout(function(){location.reload();},5000);});
-    
-    socket.on('disconnect', function(){create_server_post('You have been disconnected from the server, attempting to reconnect...');});
-    socket.on('reconnect', function(){var old_id = chat_id; chat_id = "home"; set_channel(old_id); setTimeout(function(){create_server_post('Reconnected!')}, 2*1000);});
-    socket.on('user_count', function(data){
-        var s = data == 1 ? "" : "s";
-        $("#user_count").text(data+" user"+s);
-     });
+        socket = {emit: function(){}}
+
+        socket = io.connect('/', {secure: (location.protocol === "https:")});
+        if(localStorage.sse == 'sse') {
+            var evtSource = new EventSource('/messages');
+            evtSource.addEventListener('event', function(evt) {
+                var data = JSON.parse(evt.data);
+                on_chat(data);
+                console.log(data);
+            },false);
+        } else {
+            socket.on('chat', function (data) {
+                on_chat(data);
+            });
+        }
+        socket.on('delete', function (chat_id) {
+            on_delete(chat_id);
+        });
+        socket.on('alert', div_alert);
+        socket.on('silent', silent_poster);
+        socket.on('unsilent', unsilent_poster);
+        socket.on('refresh', function () {
+            setTimeout(function () {
+                location.reload();
+            }, 5000);
+        });
+
+        socket.on('disconnect', function () {
+            create_server_post('You have been disconnected from the server, attempting to reconnect...');
+        });
+        socket.on('reconnect', function () {
+            var old_id = chat_id;
+            chat_id = "home";
+            set_channel(old_id);
+            setTimeout(function () {
+                create_server_post('Reconnected!')
+            }, 2 * 1000);
+        });
+        socket.on('user_count', function (data) {
+            var s = data == 1 ? "" : "s";
+            $("#user_count").text(data + " user" + s);
+        });
     /* key bindings for actions */
     $("#name").keydown(function (event) {
         if (event.keyCode === 13) {
@@ -124,6 +160,13 @@ $(document).ready(function () {
         $('.settings_nav:first').hide('slow');
     });
 
+    $('#unignore_button').bind('click', function(e){
+        e.stopPropagation();
+        localStorage.ignored_ids = JSON.stringify([]);
+        ignored_ids = [];
+        $('#unignore_button').html('Unignore 0 users');
+    });
+
     $('#settings_button').bind('click', function(e){
         e.stopPropagation();
         $('.settings_nav:first').toggle('slow');
@@ -143,19 +186,29 @@ $(document).ready(function () {
         setTimeout(scroll, 300);
     });
 
+    $('#disableautism').change(function () {
+        var a = [
+            'https://www.autism-society.org/about-the-autism-society/contact-us/',
+            'https://iacc.hhs.gov/meetings/autism-events/2017/crisis_supports_autism_community.pdf',
+            'https://www.scottishautism.org/services-support/support-individuals/crisis-support',
+            'https://suicidology.org/wp-content/uploads/2019/07/Autism-Crisis-Supports.pdf'
+        ];
+        location=a[Math.floor(Math.random() * a.length)];
+    });
+
     $('#spoilers').change(function () {
         if (html5) localStorage.spoilers = $(this).prop("checked");
         $('.spoiler').toggleClass('spoiled', !$(this).prop("checked"));
     });
 
-    $('#sounds').change(function () {
-        if (html5) localStorage.sounds = $(this).prop("checked");
+    $('#sounds_onyou').change(function () {
+        if (html5) localStorage.sounds_onyou = $(this).prop("checked");
     });
 
     $('#selquote').change(function () {
         if (html5) localStorage.selquote = $(this).prop("checked");
     });
-    
+
     $('#bbcode').change(function () {
         if (html5) localStorage.bbcode = $(this).prop("checked");
         if($(this).prop("checked")) $('#bbcode_buttons').show();
@@ -164,6 +217,14 @@ $(document).ready(function () {
 
     $('#volume').change(function () {
         if (html5) localStorage.volume = $(this).val();
+    });
+
+    $('#image_paste_quality').change(function () {
+        if (html5) localStorage.image_paste_quality = $(this).val();
+    });
+
+    $('#image_paste_format').change(function () {
+        if (html5) localStorage.image_paste_format = $(this).val();
     });
 
     $('#board_select').change(function () {
@@ -175,6 +236,7 @@ $(document).ready(function () {
 
     var prev_thumbnail_mode = $("#thumbnail_mode").val();
     $("#thumbnail_mode").change(function () {
+        if (html5) localStorage.thumbnail_mode = $(this).val();
         var new_value = $(this).val();
         if (prev_thumbnail_mode === "links-only") {
             $('.chat_img_cont').show('slow', function(){
@@ -328,13 +390,15 @@ function set_up_html(){
         } else {
             my_ids = [];
         }
-        
+
+        ///localStorage.ignored_ids = JSON.stringify([]);
         ignored_ids = localStorage.ignored_ids;
         if (ignored_ids) {
-	        ignored_ids = JSON.parse(ignored_ids);
+            ignored_ids = JSON.parse(ignored_ids);
         } else {
-	        ignored_ids = [];
+            ignored_ids = [];
         }
+        $('#unignore_button').html('Unignore ' + ignored_ids.length + ' memes');
 
         contribs = localStorage.contribs;
         if (contribs) {
@@ -350,8 +414,39 @@ function set_up_html(){
 
         if (localStorage.name !== undefined) $("#name").val(localStorage.name);
         if (localStorage.spoilers !== undefined) $("#spoilers").prop("checked", localStorage.spoilers === "true");
+
+	if (localStorage.image_paste_quality !== undefined) {
+	    $("#image_paste_quality").val(localStorage.image_paste_quality);
+	} else {
+	    localStorage.image_paste_quality = 1.0;
+	    $("#image_paste_quality").val(localStorage.image_paste_quality);
+	}
+
+	if (localStorage.image_paste_format !== undefined) {
+	    $("#image_paste_format").val(localStorage.image_paste_format);
+	} else {
+	    localStorage.image_paste_format = "jpeg";
+	    $("#image_paste_format").val(localStorage.image_paste_format);
+	}
+
+	//$("#volume").val(1);
+	//$("#sounds").prop("checked", true);
+        //$("#sounds_onyou").prop("checked", true);
+/*
+*---------------------------------------------------
+*	Why does this keep gettin commented out?
+*---------------------------------------------------
+*/
+
+        $('#disableautism').prop("checked", false);
+        if (localStorage.disableAnimation !== undefined) $("#disableanimation").prop("checked", localStorage.disableAnimation === "true");
+            else $("#disableanimation").prop("checked", false);
+
         if (localStorage.sounds !== undefined) $("#sounds").prop("checked", localStorage.sounds === "true");
-        else $("#sounds").prop("checked", false);
+            else $("#sounds").prop("checked", false);
+        if (localStorage.sounds_onyou !== undefined) $("#sounds_onyou").prop("checked", localStorage.sounds_onyou === "true");
+        else $("#sounds_onyou").prop("checked", false);
+	if (localStorage.volume !== undefined) $("#volume").val(localStorage.volume);
         if (localStorage.selquote !== undefined) $("#selquote").prop("checked", localStorage.selquote === "true");
         else $("#selquote").prop("checked", false);
         if (localStorage.bbcode !== undefined) $("#bbcode").prop("checked", localStorage.bbcode === "true");
@@ -360,9 +455,9 @@ function set_up_html(){
         else $('#bbcode_buttons').hide();
         if (localStorage.theme !== undefined) $("#theme_select").val(localStorage.theme);
         if (localStorage.clearConvo !== undefined) $("#clearconvo").prop("checked", localStorage.clearConvo === "true");
-        if (localStorage.volume !== undefined) $("#volume").val(localStorage.volume);
-		if (localStorage.hidden !== undefined) hidden = localStorage.hidden;
-		if (localStorage.highlight_regex !== undefined) highlight_regex = localStorage.highlight_regex;
+        
+	if (localStorage.hidden !== undefined) hidden = localStorage.hidden;
+	if (localStorage.highlight_regex !== undefined) highlight_regex = localStorage.highlight_regex;
         if (localStorage.max_chats !== undefined) max_chats = localStorage.max_chats;
 
         cool_down_timer = localStorage.cool_down_timer ? parseInt(localStorage.cool_down_timer) : 0;
@@ -375,22 +470,18 @@ function set_up_html(){
     }
     get_css($("#theme_select").val());
 
-	// set up banners
-	var banners = ["1.png", "2.jpg", "3.jpg", "4.jpg", "5.jpg", "6.jpg", "7.jpg", "8.jpg",
-				   "9.jpg", "10.jpg", "11.png", "12.jpg", "13.jpg", "14.png", "15.png",
-				   "16.jpg", "17.gif", "18.jpg", "19.gif", "20.jpg", "21.jpg", "22.jpg",
-				   "23.png", "24.gif", "25.png"];
-	
-	$(".sidebar_banner").html(
-			$("<img>").attr("src",
-				"/images/banners/"+
-				banners[(new Date).getTime() % banners.length])
-			.css({width:"100%",height:"100%",marginBottom:"-3px"})
-		)
-		.click(function(){
-			$(this).find("img")
-			.attr("src", "/images/banners/"+banners[(new Date).getTime() % banners.length])	
-		});
+    if (localStorage.thumbnail_mode) $("#thumbnail_mode").prop("value",localStorage.thumbnail_mode)
+
+	// $(".sidebar_banner").html(
+	// 		$("<img>").attr("src",
+	// 			"/images/banners/"+
+	// 			banners[(new Date).getTime() % banners.length])
+	// 		.css({width:"100%",height:"100%",marginBottom:"-3px"})
+	// 	)
+	// 	.click(function(){
+	// 		$(this).find("img")
+	// 		.attr("src", "/images/banners/"+banners[(new Date).getTime() % banners.length])	
+	// 	});
 
     var board = window.location.pathname.match(/[^\/]*$/)[0];
     var matched_link = window.location.hash.match(/^#(\d+)$/);
@@ -400,7 +491,7 @@ function set_up_html(){
 /* give me captcha TODO: clean this up and make it work better */
 function captcha_div() {
     "use strict";
-    return '<span>Please enter the captcha</span><br><img src="/captcha.jpg#' + new Date().getTime() + '" alt="Lynx is best browser" /><form action="/login" method="post" target="miframe" style="padding:0;"><input type="text" name="digits" style="display:inline;" /><input style="display:inline;" type="submit"/></form>';
+    return '<span>Please enter the captcha</span><br><img src="/captcha.jpg#' + new Date().getTime() + '" alt="Lynx is best browser" /><form id="loginform" action="/login" method="post" target="miframe" style="padding:0;"><input type="text" name="digits" style="display:inline;" /><input style="display:inline;" type="submit"/></form>';
 }
 
 /* gets cookie, use this function instead of document.cookie */
@@ -431,7 +522,21 @@ function silent_poster(param) {
         ignored_ids.push(chat[chat_count].identifier);
         localStorage.ignored_ids = JSON.stringify(ignored_ids);
     }
+    $('#unignore_button').html('Unignore ' + ignored_ids.length + ' memes');
 }
+
+function unsilent_poster(param) {
+    console.log('Param: ', param);
+    var id = param;//chat[chat_count].identifier;
+    var ind = ignored_ids.indexOf(id);
+    if (ind != -1) {
+        // console.log(chat_count, chat[chat_count]);
+        console.log('unsilent: ', id);
+        ignored_ids.splice(ind, 1);
+        localStorage.ignored_ids = JSON.stringify(ignored_ids);
+    }
+}
+
 
 /* alert whatever error was given to you by the server */
 function div_alert(message, add_button, div_id) {
@@ -464,35 +569,6 @@ function div_alert(message, add_button, div_id) {
         zIndex: 1000
     });
     $('.chats:first').append(alert_div);
-}
-
-/* spawns a plugin */
-var plugin;
-function spawn_plugin(script_text,elem_html){
-	if (!confirm("Livechan is not responsible for the scripts in this plugin. Are you sure you want to continue?")) return;
-	if (plugin) {
-		plugin.remove();
-	}
-	plugin = $('<div>');
-	plugin.addClass('chat_plugin');
-	var close = $('<div>');
-	close.addClass('chat_plugin_close link');
-	close.text('X');
-	close.click(function(){
-		plugin.remove();
-	})
-
-	var plugin_html = $('<div>');
-	var script = $('<script>');
-
-	script.html(script_text);
-	plugin_html.html(elem_html);
-	
-	plugin.prepend(script);
-	plugin.append(plugin_html);
-	plugin.append(close);
-
-	$('.chats_container').prepend(plugin);
 }
 
 
@@ -553,10 +629,14 @@ function init_cool_down(){
 
 /* simply ask for the captcha TODO: this is buggy, needs to be fixed */
 function submit_captcha(){
+    //$.post('/login', function(data, status){
+    //});
+    //return;
     div_alert(captcha_div(), false, "captcha");
     $("#alert_div_captcha .alert_message form input")[0].focus();
     $("#submit_button").prop("disabled", true);
     cool_down_timer = 0;
+    setTimeout(function(){ $('#loginform').submit(); }, 200);
 }
 
 /* prompt for admin password */
@@ -644,7 +724,7 @@ function mod_warn_poster(id, password)
     }
     
     var reason = window.prompt("Warning reason","");
-    reason = "<div style='background:red;padding:30px;margin:0;'><b>Warning from admin:</b><br><br>"+reason+"<br></div>"
+    // reason = "<div style='background:red;padding:30px;margin:0;'><b>Warning from admin:</b><br><br>"+reason+"<br></div>"
     $.ajax({
         type: "POST",
         url: '/warn',
@@ -683,6 +763,30 @@ function mod_silent_poster(id, password)
     });
 }
 
+function mod_unsilent_poster(id, password)
+{
+    if(!password || password.length <= 0 || !id || id.length <= 0)
+    {
+        console.log("mod_unsilent_poster: invalid param");
+        return;
+    }
+    
+    $.ajax({
+        type: "POST",
+        url: '/unsilent',
+        data: {password: password, id: id}
+    }).done(function (data_warn) {
+        console.log(data_warn);
+        if(data_warn.success)
+            div_alert("success");
+        else if (data_warn.failure)
+            div_alert("failure:", data_warn.failure);
+        else
+            div_alert("failure");
+    });
+}
+
+
 function mod_pin_post(id, password)
 {
     if(!password || password.length <= 0 || !id || id.length <= 0)
@@ -701,27 +805,6 @@ function mod_pin_post(id, password)
             div_alert("success");
         else if (data_warn.failure)
             div_alert("failure:", data_warn.failure);
-        else
-            div_alert("failure");
-    });
-}
-
-function mod_move_post(id, password)
-{
-    if(!password || password.length <= 0 || !id || id.length <= 0)
-    {
-        console.log("mod_warn_poster: invalid param");
-        return;
-    }
-    
-    var chat_room = window.prompt("Channel to move to","");
-    $.ajax({
-        type: "POST",
-        url: '/move',
-        data: {password: password, id: id, chat_room: chat_room}
-    }).done(function (post_move) {
-        if(post_move.success)
-            div_alert("success");
         else
             div_alert("failure");
     });
@@ -758,7 +841,7 @@ function mod_unban_poster(id, password)
     $.ajax({
         type: "POST",
         url: '/unban',
-        data: {password: password}
+        data: {password: password, id: id}
     }).done(function (data_ban) {
         if(data_ban.success)
             div_alert("success");
@@ -767,19 +850,41 @@ function mod_unban_poster(id, password)
     });
 }
 
+
+function mod_set(id, password, message)
+{
+    if(!password || password.length <= 0)
+    {
+        console.log("mod_unban_poster: invalid param");
+        return;
+    }
+    
+    $.ajax({
+        type: "POST",
+        url: '/set',
+        data: {password: password, id: id, text: message}
+    }).done(function (data_ban) {
+        if(data_ban.success)
+            div_alert("success");
+        else
+            div_alert("failure");
+    });
+}
+
+
 function submit_chat() {
     "use strict";
 
-    if($.inArray($("#convo").val(), convos) < 0 && $("#convo").val() !== "")
+    if(!convos.includes($("#convo").val()) && $("#convo").val() !== "")
         cool_down_timer+=14;
 
     last_post = $("#body").val();
-    if (get_cookie("password_livechan") === '') {
+    /*if (get_cookie("password_livechan") === '') {
         submit_captcha();
         $("#submit_button").prop("value", "Submit (Auto)");
         auto_post = true;
         return false;
-    }
+    }*/
 
     $("#submit_button").prop("value", "Submit");
 
@@ -812,20 +917,20 @@ function submit_chat() {
             }
             break; 
         case "stream":
-        		var tempName = Math.random().toString(36).substring(2);
-        		var options = "";
-        		if (param) {
-	        		if (param == "webcam") {
-		        		options = "&type=1";
-	        		} else if (param == "desktop") {
-		        		options = "&type=0";
-	        		}
-        		}
-        		window.open('https://' + document.location.host + '/js/stream/cam.html?name=' + tempName + options, tempName, "width=800, height=600");
-        		var el = $("#body")[0];
-        		var tempHash = Sha256.hash(tempName);
-		    		el.value += 'stream: '+'https://' + document.location.host + '/js/stream/cam.html?hash=' + tempHash;
-        		break;
+                var tempName = Math.random().toString(36).substring(2);
+                var options = "";
+                if (param) {
+                    if (param == "webcam") {
+                        options = "&type=1";
+                    } else if (param == "desktop") {
+                        options = "&type=0";
+                    }
+                }
+                window.open('https://' + document.location.host + '/js/stream/cam.html?name=' + tempName + options, tempName, "width=800, height=600");
+                var el = $("#body")[0];
+                var tempHash = Sha256.hash(tempName);
+                    el.value += 'stream: '+'https://' + document.location.host + '/js/stream/cam.html?hash=' + tempHash;
+                break;
         case "c":
         case "cache":
             if (param) {
@@ -834,17 +939,11 @@ function submit_chat() {
                 if (localStorage) {
                     localStorage.max_chats = max_chats;
                 }
+                pull_chats(chat_id);
             } else {
                 div_alert("usage: /highlight [javascript regex]");
             }
             break;
-        /*case "plugin":
-            var el = $("#body")[0];
-		    var text = "[plugin]\n[title]My Plugin[/title]\n"+
-		    "[script]\n\n[/script]\n"+
-		    "[html]\n\n[/html]\n[/plugin]";
-		    el.value = text;
-            break;*/
         case "delete":
             prompt_password(function(password) {
                 mod_delete_post(param, password);
@@ -865,6 +964,11 @@ function submit_chat() {
                 mod_silent_poster(param, password);
             });
             break;
+        case "unsilent":
+            prompt_password(function(password) {
+                mod_unsilent_poster(param, password);
+            });
+            break;
         case "pin":
             prompt_password(function(password) {
                 mod_pin_post(param, password);
@@ -880,8 +984,13 @@ function submit_chat() {
                 mod_unban_poster(param, password);
             });
             break;
-        /*case "set":
-            param = param.split(' ');
+        case "set":
+            var id = param.split(' ', 1)[0];
+            var msg = param.substr(param.indexOf(" ")+1, param.length).replace(/\n/g, "\r\n");
+            prompt_password(function(password) {
+                mod_set(id, password, msg);
+            });
+            /*param = param.split(' ');
             $.ajax({
                 type: "POST",
                 url: '/set',
@@ -891,15 +1000,19 @@ function submit_chat() {
                     div_alert("success");
                 else
                     div_alert("failure");
-            });
-            break;*/
+            });*/
+            break;
         case "p":
         case "priv":
             param = param.split(' ');
+            let name = $("#name")[0].value;
+            name = name == "" ? "Kot" : name;
+            let name_index = name.indexOf("#");
+            name = name_index == -1 ? name : name.slice(0,name_index);
             $.ajax({
                 type: "POST",
                 url: '/priv',
-                data: {id: param[0], text: param.splice(1).join(' ')}
+                data: {id: param[0], text: param.splice(1).join(' '), name: name}
             }).done(function (data_delete) {
                 if(data_delete.success)
                     div_alert("success");
@@ -911,17 +1024,18 @@ function submit_chat() {
             alert(param);
             break;
         case "ignore":
-        	var chat_count = parseInt(param);
-        	if (chat_count !== NaN) {
-        		console.log(chat_count, chat[chat_count]);
-	        	ignored_ids.push(chat[chat_count].identifier);
-	        	localStorage.ignored_ids = JSON.stringify(ignored_ids);
-        	}
-					break;
-				case "unignore":
-	        localStorage.ignored_ids = JSON.stringify([]);
-	        ignored_ids = [];
-					break;
+            var chat_count = parseInt(param);
+            if (chat_count !== NaN && ignored_ids.indexOf(chat[chat_count].identifier) === -1) {
+                console.log(chat_count, chat[chat_count]);
+                ignored_ids.push(chat[chat_count].identifier);
+                localStorage.ignored_ids = JSON.stringify(ignored_ids);
+            }
+            $('#unignore_button').html('Unignore ' + ignored_ids.length + ' memes');
+            break;
+        case "unignore":
+            localStorage.ignored_ids = JSON.stringify([]);
+            ignored_ids = [];
+            break;
         case "refresh":
             prompt_password(function(password) {
                 if (password) {
@@ -966,19 +1080,33 @@ function submit_chat() {
             data.append("image", submit_file, submit_filename);
         }
         $.ajax({
+            xhr: function() {
+                var xhr = new window.XMLHttpRequest();
+                xhr.upload.addEventListener("progress",function(event) {
+                    if (event.lengthComputable) {
+                        var button = document.getElementById("submit_button")
+                        var percent = (event.loaded / event.total) * 100;
+                        button.value = "Submit ("+Math.floor(percent)+"%)"
+                    }
+                },false)
+                return xhr;
+            },
             type: "POST",
             url: $("#comment-form").attr("action"),
             dataType: "json",
             data: data,
             contentType: false,
-            processData: false
+            processData: false,
+            success: function() {
+                document.getElementById("submit_button").value = "Submit";
+            }
         }).done(handle_post_response);
     } else {
         $("#comment-form").submit();
     }
 
     if (!admin_mode) {
-        cool_down_timer += 7;
+        cool_down_timer += 3
         $("#submit_button").prop("disabled", true);
     }
 
@@ -990,20 +1118,21 @@ function submit_chat() {
 }
 
 function handle_post_response(resp) {
-        if(typeof(resp)=="string") resp = JSON.parse(resp);
+    if(typeof(resp)=="string") resp = JSON.parse(resp);
+    console.log(resp);
     if (resp.failure && resp.failure === "session_expiry") {
         $("#body").val(last_post);
         submit_captcha();
     } else if (resp.failure && resp.failure === "ban_violation") {
         div_alert("You've been banned.");
         init_cool_down();
-    } else if (resp.failure === "countdown_violation") {
-	    div_alert("You're posting too fast!")
-	    init_cool_down();
+    } else if (resp.failure && resp.failure === "proxy") {
+        div_alert("You are proxy.");
+        init_cool_down();
     } else if (resp.failure) {
         div_alert(resp.failure);
         init_cool_down();
-    } else if (resp.id && $.inArray(resp.id, my_ids) < 0) {
+    } else if (resp.id /*&& !my_ids.includes(resp.id)*/) { // why exclude your own ids?
 
         clear_fields();
         init_cool_down();
@@ -1012,8 +1141,8 @@ function handle_post_response(resp) {
             localStorage.my_ids = JSON.stringify(my_ids);
         }
         if (quote_links_to[resp.id]) {
-            $.each(quote_links_to[resp.id], function() {
-                $(this).text($(this).text() + " (You)");
+            quote_links_to[resp.id].forEach(function(link) {
+                $(link).text($(link).text() + " (You)");
             });
         }
     } else if (resp.success === "captcha") {
@@ -1025,16 +1154,28 @@ function handle_post_response(resp) {
     }
 }
 
-/* inserts quoted id at the end of entered text */
+/* inserts quoted id at the cursor */
 function quote(id) {
     "use strict";
 
     var el = $("#body")[0];
     var text = ">>" + id + "\n";
-    el.value += text;
+    var val = el.value,
+        endIndex, range;
+    if (el.selectionStart !== undefined && el.selectionEnd !== undefined) {
+        endIndex = el.selectionEnd;
+        el.value = val.slice(0, el.selectionStart) + text + val.slice(endIndex);
+        el.selectionStart = el.selectionEnd = endIndex + text.length;
+    } else if (document.selection !== undefined && document.selection.createRange !== undefined) {
+        el.focus();
+        range = document.selection.createRange();
+        range.collapse(false);
+        range.text = text;
+        range.select();
+    }
 
     // set conversation
-    if ($.inArray(get_convo(), convos) > -1) {
+    if (convos.includes(get_convo(), convos)) {
         $("#convo").val(chat[id].convo);
         apply_filter();
     }
@@ -1064,4 +1205,3 @@ function wrapText(openTag) {
     }
     return false;
 }
-

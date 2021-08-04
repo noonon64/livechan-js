@@ -1,5 +1,6 @@
-var stickers = ['folder-name'];
+var stickers = [];
 // end of stickers
+
 
 
 
@@ -72,8 +73,8 @@ function list_stickers(){
 }
 function put_sticker(val){
     var last_stickers = JSON.parse(localStorage['stickers']);
-    if($.inArray(val, last_stickers)!=-1){
-        last_stickers.splice($.inArray(val, last_stickers),1);
+    if(last_stickers.includes(val)){
+        last_stickers.splice(last_stickers.indexOf(val),1);
     }
     last_stickers.unshift(val);
     if(last_stickers.length>15) last_stickers.pop();

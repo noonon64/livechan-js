@@ -1,11 +1,11 @@
 #!/bin/bash
 # Builds and installs third-party client-side Javascript.
 
-pushd $(dirname "$0") > /dev/null
+pushd $(pwd) > /dev/null
 PATH=$PWD/node_modules/.bin:$PATH
 
 # retrieve scripts
-npm install
+# npm install
 bower install
 
 # for fetching source information
@@ -18,9 +18,6 @@ function source_line {
 
 # install jQuery
 (source_line jQuery; cat bower_components/jQuery/dist/jquery.js) > public/js/jquery.js
-
-# install html5shiv
-(source_line html5shiv; cat bower_components/html5shiv/dist/html5shiv.js) > public/js/html5shiv.min.js
 
 # install highlight.js
 mkdir -p public/plugins/code_highlight/css
@@ -43,14 +40,15 @@ cp bower_components/highlight/src/styles/* public/plugins/code_highlight/css
 
 # check installation
 echo Installed:
-ls -l public/js/jquery.* public/js/html5shiv.min.js public/plugins/code_highlight/highlight.js public/js/socket.io-stream.min.js
+ls -l public/js/jquery.* PUBLIC/PLugins/code_highlight/highlight.js public/js/socket.io-stream.min.js
 
 # minify scripts
 for x in public/js/jquery.js public/plugins/code_highlight/highlight.js
 do
     pushd $(dirname $x) > /dev/null
     y=$(basename $x)
-    uglifyjs $y -c hoist_funs=false,loops=false,unused=false -m --comments '/^\!|@preserve|@license|@cc_on|@source|copyright/i' --source-map ${y/.js/.min.map} > ${y/.js/.min.js}
+    echo "$y"
+    uglifyjs $y -c hoist_funs=false,loops=false,unused=false -m --comments '/^\!|@preserve|@license|@cc_on|@source|copyright/i' --source-map ${y/.js/.min.map} -o ${y}.min.js
     popd > /dev/null
     echo "Minified $x: $(cat $x | wc -c) -> $(cat ${x/.js/.min.js} | wc -c)"
 done

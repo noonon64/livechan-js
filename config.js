@@ -9,16 +9,18 @@ module.exports = {
         'trv', 'tv', 'vp', 'waifu', 'wsg', 'x', 'dev', 'tech', 'prog',
         'dogecoin', 'fedoracoin', 'coin', 'q', 'cats', 'draw', 'hotel'*/
     ],
+		flag_boards: [
+			'int', 'pol', 'news', 'sp', 'soc'
+		],
 
     all_fields: 'chat name body convo convo_id count date trip',
     board_fields: 'chat name body convo convo_id count date trip country country_name image image_filename image_filesize image_width image_height duration thumb identifier',
 
-    admin_pw_file: 'admin_pw.txt',
-    no_limit_cookie_file: 'no_limit_cookie.txt',
+    admin_pw_file: 'persist/admin_pw.txt',
     max_pw_attempts: 10,
     max_pw_attempts_window: 30000,
     securetrip_salt: 'AVEPwfpR4K8PXQaKa4PjXYMGktC2XY4Qt59ZnERsEt5PzAxhyL',
-    salt_file: 'salt.txt',
+    salt_file: 'persist/salt.txt',
 
     /* User session expires every 24 hours */
     user_session_age: '24h',
@@ -64,6 +66,9 @@ module.exports = {
         "78.51.": "DE-04",
         "89.70.": "PL-78",
         "212.62.": "RS-05",
-    }
-
+    },
+		root: __dirname,
+		upload_dir: 'public/tmp/uploads',
+		post_interval: 3000,
+		spam_interval: 3000,
 };
